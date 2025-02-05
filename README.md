@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Finance Tracker
 A basic finance tracker built with React and Supabase. Track expenses, manage budgets, and visualize your spending patterns with interactive charts and real-time updates.
 This project is built with Vite, React, TypeScript, TailwindCSS, Lucide React, and Supabase. This project was created in order to learn how to use AI powered tools.
@@ -147,3 +148,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Your Name - [@yourusername](https://twitter.com/yourusername)
 
 Project Link: [https://github.com/yourusername/finance-tracker](https://github.com/yourusername/finance-tracker) 
+=======
+# Finance-Tracker
+>>>>>>> ba99a30 (Initial commit)
