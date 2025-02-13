@@ -51,11 +51,11 @@ export function Dashboard() {
         .select('amount, date, categories(name)')
         .eq('user_id', user.id)
         .gte('date', startDate.toISOString())
-        .lte('date', endDate.toISOString());
+        .lte('date', endDate.toISOString()) as { data: RawExpenseData[] | null; error: any };
 
       if (error) throw error;
 
-      const formattedExpenses: Expense[] = (data as RawExpenseData[] || []).map(item => ({
+      const formattedExpenses: Expense[] = (data || []).map(item => ({
         amount: Number(item.amount),
         date: item.date,
         categories: {
@@ -117,49 +117,49 @@ export function Dashboard() {
     setDailyTotals(dailyData);
   };
 
-  if (loading) return <div className="text-center py-4">Loading dashboard...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (loading) return <div className="text-center py-4 text-gray-700 dark:text-gray-300">Loading dashboard...</div>;
+  if (error) return <div className="text-red-600 dark:text-red-400">{error}</div>;
 
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded">
-              <DollarSign className="h-6 w-6 text-blue-600" />
+            <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded">
+              <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Total Spent</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Spent</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                 ${totalSpent.toFixed(2)}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded">
-              <TrendingUp className="h-6 w-6 text-green-600" />
+            <div className="p-2 bg-green-100 dark:bg-green-900 rounded">
+              <TrendingUp className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Most Spent On</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Most Spent On</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                 {categoryTotals[0]?.name || 'N/A'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded">
-              <Activity className="h-6 w-6 text-purple-600" />
+            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded">
+              <Activity className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">Daily Average</p>
-              <p className="text-2xl font-semibold text-gray-900">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Daily Average</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                 ${(totalSpent / dailyTotals.length).toFixed(2)}
               </p>
             </div>
@@ -170,21 +170,30 @@ export function Dashboard() {
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Spending Trend */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Spending Trend</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Spending Trend</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={dailyTotals}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="date" stroke="#9CA3AF" />
+                <YAxis stroke="#9CA3AF" />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgb(31, 41, 55)', 
+                    border: 'none',
+                    borderRadius: '0.375rem',
+                    color: '#fff'
+                  }}
+                  labelStyle={{ color: '#fff' }}
+                />
                 <Legend />
                 <Line
                   type="monotone"
                   dataKey="amount"
                   stroke="#3B82F6"
                   name="Spending"
+                  strokeWidth={2}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -192,8 +201,8 @@ export function Dashboard() {
         </div>
 
         {/* Category Distribution */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium mb-4">Category Distribution</h3>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+          <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-white">Category Distribution</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -207,8 +216,16 @@ export function Dashboard() {
                   fill="#3B82F6"
                   label
                 />
-                <Tooltip />
-                <Legend />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'rgb(31, 41, 55)', 
+                    border: 'none',
+                    borderRadius: '0.375rem',
+                    color: '#fff'
+                  }}
+                  labelStyle={{ color: '#fff' }}
+                />
+                <Legend formatter={(value) => <span className="text-gray-900 dark:text-gray-100">{value}</span>} />
               </PieChart>
             </ResponsiveContainer>
           </div>

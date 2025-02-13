@@ -185,11 +185,11 @@ export function BudgetList() {
     }
   };
 
-  if (loading) return <div className="text-center py-4">Loading budgets...</div>;
+  if (loading) return <div className="text-center py-4 text-gray-700 dark:text-gray-300">Loading budgets...</div>;
   if (error) return (
-    <div className="bg-red-50 border border-red-200 rounded-md p-4 flex items-center">
-      <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
-      <span className="text-red-700">{error}</span>
+    <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-800 rounded-md p-4 flex items-center">
+      <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400 mr-2" />
+      <span className="text-red-700 dark:text-red-300">{error}</span>
     </div>
   );
 
@@ -199,7 +199,7 @@ export function BudgetList() {
       {!isAddingBudget && !editingBudget && (
         <button
           onClick={() => setIsAddingBudget(true)}
-          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-md"
         >
           <PlusCircle className="h-5 w-5 mr-2" />
           Add Budget
@@ -208,22 +208,22 @@ export function BudgetList() {
 
       {/* Add Budget Form */}
       {isAddingBudget && (
-        <form onSubmit={handleAddBudget} className="bg-white p-4 rounded-lg shadow space-y-4">
-          <h3 className="text-lg font-medium">Add New Budget</h3>
+        <form onSubmit={handleAddBudget} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Add New Budget</h3>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
             <input
               type="text"
               required
               value={newBudget.name}
               onChange={(e) => setNewBudget({ ...newBudget, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
             <input
               type="number"
               required
@@ -231,17 +231,17 @@ export function BudgetList() {
               step="0.01"
               value={newBudget.amount}
               onChange={(e) => setNewBudget({ ...newBudget, amount: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Category</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
             <select
               required
               value={newBudget.category_id}
               onChange={(e) => setNewBudget({ ...newBudget, category_id: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
@@ -253,12 +253,12 @@ export function BudgetList() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Period</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Period</label>
             <select
               required
               value={newBudget.period}
               onChange={(e) => setNewBudget({ ...newBudget, period: e.target.value as 'monthly' | 'yearly' })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
@@ -269,13 +269,13 @@ export function BudgetList() {
             <button
               type="button"
               onClick={() => setIsAddingBudget(false)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
             >
               Add Budget
             </button>
@@ -285,22 +285,22 @@ export function BudgetList() {
 
       {/* Edit Budget Form */}
       {editingBudget && (
-        <form onSubmit={handleUpdateBudget} className="bg-white p-4 rounded-lg shadow space-y-4">
-          <h3 className="text-lg font-medium">Edit Budget</h3>
+        <form onSubmit={handleUpdateBudget} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow space-y-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Edit Budget</h3>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
             <input
               type="text"
               required
               value={editingBudget.name}
               onChange={(e) => setEditingBudget({ ...editingBudget, name: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
             <input
               type="number"
               required
@@ -308,17 +308,17 @@ export function BudgetList() {
               step="0.01"
               value={editingBudget.amount}
               onChange={(e) => setEditingBudget({ ...editingBudget, amount: parseFloat(e.target.value) })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Category</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
             <select
               required
               value={editingBudget.category_id}
               onChange={(e) => setEditingBudget({ ...editingBudget, category_id: e.target.value })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
@@ -330,12 +330,12 @@ export function BudgetList() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">Period</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Period</label>
             <select
               required
               value={editingBudget.period}
               onChange={(e) => setEditingBudget({ ...editingBudget, period: e.target.value as 'monthly' | 'yearly' })}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
             >
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
@@ -346,13 +346,13 @@ export function BudgetList() {
             <button
               type="button"
               onClick={() => setEditingBudget(null)}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
             >
               Update Budget
             </button>
@@ -363,24 +363,24 @@ export function BudgetList() {
       {/* Budget List */}
       <div className="space-y-4">
         {budgets.map((budget) => (
-          <div key={budget.id} className="bg-white p-4 rounded-lg shadow">
+          <div key={budget.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
             <div className="flex justify-between items-start mb-2">
               <div>
-                <h3 className="text-lg font-medium">{budget.name}</h3>
-                <p className="text-sm text-gray-500">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">{budget.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {budget.category.name} • {budget.period}
                 </p>
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => setEditingBudget(budget)}
-                  className="p-1 text-gray-400 hover:text-blue-500"
+                  className="p-1 text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
                 >
                   <Edit2 className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => handleDeleteBudget(budget.id)}
-                  className="p-1 text-gray-400 hover:text-red-500"
+                  className="p-1 text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
                 >
                   <Trash2 className="h-5 w-5" />
                 </button>
@@ -389,25 +389,25 @@ export function BudgetList() {
 
             <div className="mt-4">
               <div className="flex justify-between text-sm mb-1">
-                <span>Progress</span>
-                <span>
+                <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                <span className="text-gray-900 dark:text-white">
                   ${budget.spent.toFixed(2)} of ${budget.amount.toFixed(2)}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div
                   className={`h-2.5 rounded-full ${
                     budget.percentage >= 100
-                      ? 'bg-red-600'
+                      ? 'bg-red-600 dark:bg-red-500'
                       : budget.percentage >= 80
-                      ? 'bg-yellow-400'
-                      : 'bg-green-600'
+                      ? 'bg-yellow-400 dark:bg-yellow-500'
+                      : 'bg-green-600 dark:bg-green-500'
                   }`}
                   style={{ width: `${Math.min(budget.percentage, 100)}%` }}
                 ></div>
               </div>
               {budget.percentage >= 80 && (
-                <p className={`text-sm mt-1 ${budget.percentage >= 100 ? 'text-red-600' : 'text-yellow-600'}`}>
+                <p className={`text-sm mt-1 ${budget.percentage >= 100 ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                   {budget.percentage >= 100
                     ? 'Budget exceeded!'
                     : 'Approaching budget limit'}
@@ -419,7 +419,7 @@ export function BudgetList() {
 
         {budgets.length === 0 && !isAddingBudget && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No budgets set up yet. Add your first budget to start tracking!</p>
+            <p className="text-gray-500 dark:text-gray-400">No budgets set up yet. Add your first budget to start tracking!</p>
           </div>
         )}
       </div>
