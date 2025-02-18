@@ -23,7 +23,20 @@ interface Expense {
 interface CategoryTotal {
   name: string;
   value: number;
+  fill: string;
 }
+
+const CATEGORY_COLORS = {
+  'Food & Dining': '#E63946',     // Dark red
+  'Transportation': '#1D3557',    // Dark blue
+  'Shopping': '#2A9D8F',         // Dark teal
+  'Entertainment': '#6A4C93',    // Dark purple
+  'Bills & Utilities': '#F4A261', // Dark orange
+  'Health': '#9B2226',          // Deep red
+  'Education': '#023E8A',        // Navy blue
+  'Other': '#264653',           // Dark slate
+  'default': '#495057'          // Dark gray
+};
 
 export function Dashboard() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -90,7 +103,8 @@ export function Dashboard() {
     
     const categoryData = Array.from(categoryMap.entries()).map(([name, value]) => ({
       name,
-      value
+      value,
+      fill: CATEGORY_COLORS[name as keyof typeof CATEGORY_COLORS] || CATEGORY_COLORS.default
     }));
     setCategoryTotals(categoryData);
 
