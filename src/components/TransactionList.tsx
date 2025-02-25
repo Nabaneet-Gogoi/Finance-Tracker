@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
-import { Receipt, Tag, Edit2, Trash2, X } from 'lucide-react';
+import { Receipt, Tag, Edit2, Trash2, X, CheckSquare, Square, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Transaction {
@@ -39,6 +39,8 @@ const PAYMENT_METHODS = [
 
 export function TransactionList({ expenses, onUpdate, categories }: TransactionListProps) {
   const [editingExpense, setEditingExpense] = useState<Transaction | null>(null);
+  const [selectedExpenses, setSelectedExpenses] = useState<Set<string>>(new Set());
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [editFormData, setEditFormData] = useState<EditExpenseData>({
     amount: 0,
     description: '',
@@ -46,6 +48,58 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
     payment_method: '',
     date: ''
   });
+
+  const toggleSelectionMode = () => {
+    setIsSelectionMode(!isSelectionMode);
+    setSelectedExpenses(new Set());
+  };
+
+  const toggleExpenseSelection = (id: string) => {
+    const newSelected = new Set(selectedExpenses);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedExpenses(newSelected);
+  };
+
+  const selectAllInGroup = (dateExpenses: Transaction[]) => {
+    const newSelected = new Set(selectedExpenses);
+    dateExpenses.forEach(expense => {
+      newSelected.add(expense.id);
+    });
+    setSelectedExpenses(newSelected);
+  };
+
+  const deselectAllInGroup = (dateExpenses: Transaction[]) => {
+    const newSelected = new Set(selectedExpenses);
+    dateExpenses.forEach(expense => {
+      newSelected.delete(expense.id);
+    });
+    setSelectedExpenses(newSelected);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedExpenses.size === 0) return;
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedExpenses.size} expense${selectedExpenses.size > 1 ? 's' : ''}?`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .in('id', Array.from(selectedExpenses));
+
+      if (error) throw error;
+      setSelectedExpenses(new Set());
+      setIsSelectionMode(false);
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error deleting expenses:', error);
+      alert('Failed to delete expenses. Please try again.');
+    }
+  };
 
   const handleEdit = (expense: Transaction) => {
     setEditingExpense(expense);
@@ -123,9 +177,69 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
         </div>
       ) : (
         <>
+          <div className="flex justify-between items-center">
+            <button
+              onClick={toggleSelectionMode}
+              className="flex items-center px-4 py-2 text-sm font-medium rounded-md
+                       border-2 border-gray-300 dark:border-gray-600
+                       text-gray-700 dark:text-gray-300
+                       hover:bg-gray-50 dark:hover:bg-gray-700
+                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+                       transition-colors"
+            >
+              {isSelectionMode ? (
+                <>
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel Selection
+                </>
+              ) : (
+                <>
+                  <CheckSquare className="h-4 w-4 mr-2" />
+                  Select Multiple
+                </>
+              )}
+            </button>
+            {isSelectionMode && selectedExpenses.size > 0 && (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {selectedExpenses.size} selected
+                </span>
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center px-4 py-2 text-sm font-medium rounded-md
+                           bg-red-600 hover:bg-red-700 
+                           dark:bg-red-500 dark:hover:bg-red-600
+                           text-white
+                           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                           transition-colors"
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Delete Selected
+                </button>
+              </div>
+            )}
+          </div>
+
           {Object.entries(groupedExpenses).map(([date, dateExpenses]) => (
             <div key={date} className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{date}</h3>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{date}</h3>
+                {isSelectionMode && (
+                  <button
+                    onClick={() => {
+                      const allSelected = dateExpenses.every(exp => selectedExpenses.has(exp.id));
+                      if (allSelected) {
+                        deselectAllInGroup(dateExpenses);
+                      } else {
+                        selectAllInGroup(dateExpenses);
+                      }
+                    }}
+                    className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                  >
+                    {dateExpenses.every(exp => selectedExpenses.has(exp.id)) ? 'Deselect All' : 'Select All'}
+                  </button>
+                )}
+              </div>
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow divide-y divide-gray-200 dark:divide-gray-700">
                 {dateExpenses.map((expense) => (
                   <div key={expense.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -141,7 +255,8 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
                             <X className="h-5 w-5" />
                           </button>
                         </div>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
                             <div className="mt-1 relative rounded-md shadow-sm">
@@ -154,10 +269,12 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
                                 required
                                 value={editFormData.amount}
                                 onChange={(e) => setEditFormData({ ...editFormData, amount: parseFloat(e.target.value) })}
-                                className="block w-full pl-7 pr-12 sm:text-sm border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                className="block w-full pl-7 pr-12 sm:text-sm border-2 border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+                                placeholder="0.00"
                               />
                             </div>
                           </div>
+
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
                             <input
@@ -165,26 +282,39 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
                               required
                               value={editFormData.date}
                               onChange={(e) => setEditFormData({ ...editFormData, date: e.target.value })}
-                              className="mt-1 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                              className="mt-1 block w-full sm:text-sm border-2 border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                             />
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                        </div>
+
+                        <div className="relative">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                          <div className="relative group">
                             <input
                               type="text"
                               required
                               value={editFormData.description}
                               onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                              className="mt-1 block w-full sm:text-sm border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                              className="block w-full sm:text-sm border-2 border-gray-300 dark:border-gray-600 rounded-md 
+                                       focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                                       dark:bg-gray-700 dark:text-white 
+                                       hover:border-gray-400 dark:hover:border-gray-500 
+                                       transition-colors
+                                       py-2.5 px-4 bg-white dark:bg-gray-700
+                                       shadow-sm hover:shadow-md transition-shadow"
+                              placeholder="What did you spend on?"
                             />
                           </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
                             <select
                               required
                               value={editFormData.category_id}
                               onChange={(e) => setEditFormData({ ...editFormData, category_id: e.target.value })}
-                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white"
+                              className="mt-1 block w-full pl-3 pr-10 py-2.5 text-base border-2 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                             >
                               {categories.map((category) => (
                                 <option key={category.id} value={category.id}>
@@ -193,13 +323,14 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
                               ))}
                             </select>
                           </div>
+
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payment Method</label>
                             <select
                               required
                               value={editFormData.payment_method}
                               onChange={(e) => setEditFormData({ ...editFormData, payment_method: e.target.value })}
-                              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white"
+                              className="mt-1 block w-full pl-3 pr-10 py-2.5 text-base border-2 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                             >
                               {PAYMENT_METHODS.map((method) => (
                                 <option key={method} value={method}>
@@ -209,17 +340,18 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
                             </select>
                           </div>
                         </div>
-                        <div className="flex justify-end space-x-2">
+
+                        <div className="flex justify-end space-x-2 pt-4">
                           <button
                             type="button"
                             onClick={() => setEditingExpense(null)}
-                            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                            className="px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           >
                             Cancel
                           </button>
                           <button
                             type="submit"
-                            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
+                            className="flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           >
                             Save Changes
                           </button>
@@ -227,6 +359,20 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
                       </form>
                     ) : (
                       <div className="flex items-start justify-between">
+                        {isSelectionMode && (
+                          <div className="flex-shrink-0 mr-4">
+                            <button
+                              onClick={() => toggleExpenseSelection(expense.id)}
+                              className="text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
+                            >
+                              {selectedExpenses.has(expense.id) ? (
+                                <CheckSquare className="h-5 w-5" />
+                              ) : (
+                                <Square className="h-5 w-5" />
+                              )}
+                            </button>
+                          </div>
+                        )}
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                             {expense.description}
@@ -250,18 +396,22 @@ export function TransactionList({ expenses, onUpdate, categories }: TransactionL
                           }`}>
                             ${expense.amount.toFixed(2)}
                           </span>
-                          <button
-                            onClick={() => handleEdit(expense)}
-                            className="text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
-                          >
-                            <Edit2 className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(expense.id)}
-                            className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
+                          {!isSelectionMode && (
+                            <>
+                              <button
+                                onClick={() => handleEdit(expense)}
+                                className="text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
+                              >
+                                <Edit2 className="h-5 w-5" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(expense.id)}
+                                className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}

@@ -135,7 +135,7 @@ export function Dashboard() {
   if (error) return <div className="text-red-600 dark:text-red-400">{error}</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 [--tooltip-bg:theme(colors.white)] [--tooltip-color:theme(colors.gray.900)] dark:[--tooltip-bg:theme(colors.gray.800)] dark:[--tooltip-color:theme(colors.white)]">
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
@@ -194,12 +194,13 @@ export function Dashboard() {
                 <YAxis stroke="#9CA3AF" />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'rgb(31, 41, 55)', 
+                    backgroundColor: 'var(--tooltip-bg, #fff)',
                     border: 'none',
                     borderRadius: '0.375rem',
-                    color: '#fff'
+                    color: 'var(--tooltip-color, #000)',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                   }}
-                  labelStyle={{ color: '#fff' }}
+                  labelStyle={{ color: 'inherit' }}
                 />
                 <Legend />
                 <Line
@@ -232,12 +233,13 @@ export function Dashboard() {
                 />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: 'rgb(31, 41, 55)', 
+                    backgroundColor: 'var(--tooltip-bg, #fff)',
                     border: 'none',
                     borderRadius: '0.375rem',
-                    color: '#fff'
+                    color: 'var(--tooltip-color, #000)',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                   }}
-                  labelStyle={{ color: '#fff' }}
+                  labelStyle={{ color: 'inherit' }}
                 />
                 <Legend formatter={(value) => <span className="text-gray-900 dark:text-gray-100">{value}</span>} />
               </PieChart>
@@ -247,4 +249,4 @@ export function Dashboard() {
       </div>
     </div>
   );
-} 
+}
